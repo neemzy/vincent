@@ -1,0 +1,20 @@
+@font-face {
+  font-family: "DooM";
+  src:
+    local("DooM"),
+    url("doom.ttf") format("truetype");
+}
+
+.doom-font {
+  margin-top: -1px;
+  margin-bottom: 1px;
+  font-family: "DooM";
+}
+
+.doom-logo {
+  /* half-size  */
+  width: 256px;
+  height: 150px;
+  background: url("doom-logo.png") no-repeat center center;
+  background-size: cover;
+}

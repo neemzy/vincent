@@ -1,0 +1,77 @@
+{
+  "games": [
+    {
+      "title": "The Ultimate Doom",
+      "iwad": "doom.wad",
+      "episodes": [
+        "Knee-Deep in the Dead",
+        "The Shores of Hell",
+        "Inferno",
+        "Thy Flesh Consumed",
+        {
+          "title": "Sigil",
+          "pwads": ["sigil.wad"]
+        },
+        {
+          "title": "Sigil 2",
+          "pwads": ["sigil2.wad"]
+        }
+      ]
+    },
+    {
+      "title": "Doom II",
+      "iwad": "doom2.wad",
+      "episodes": [
+        "Hell on Earth",
+        {
+          "title": "No Rest for the Living",
+          "pwads": ["nerve.wad"]
+        }
+      ]
+    },
+    {
+      "title": "Final Doom",
+      "episodes": [
+        {
+          "title": "The Plutonia Experiment",
+          "iwad": "plutonia.wad"
+        },
+        {
+          "title": "TNT: Evilution",
+          "iwad": "tnt.wad"
+        }
+      ]
+    },
+    {
+      "title": "Legacy of Rust",
+      "iwad": "doom2.wad",
+      "pwads": ["id1.wad"],
+      "episodes": [
+        "The Vulcan Abyss",
+        "Counterfeit Eden"
+      ]
+    },
+    {
+      "title": "Freedoom: Phase 1",
+      "iwad": "freedoom1.wad",
+      "episodes": [
+        "Outpost Outbreak",
+        "Military Labs",
+        "Event Horizon",
+        "Double Impact"
+      ]
+    },
+    {
+      "title": "Freedoom: Phase 2",
+      "iwad": "freedoom2.wad"
+    }
+  ],
+
+  "skills": [
+    "I'm Too Young to Die",
+    "Hey, Not Too Rough",
+    "Hurt Me Plenty",
+    "Ultra-Violence",
+    "Nightmare!"
+  ]
+}

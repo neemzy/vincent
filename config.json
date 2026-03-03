@@ -1,0 +1,51 @@
+{
+  "httpPort": 8666,
+  "wadDir": "/Users/user/storage/wads",
+  "defaultSkill": 4,
+
+  "ports": {
+    "uzdoom": {
+      "path": "/Applications/uzdoom.app/Contents/MacOS/uzdoom"
+    },
+    "crispy": {
+      "path": "/usr/local/bin/crispy-doom",
+      "setupPath": "/usr/local/bin/crispy-doom-setup"
+    },
+    "woof": {
+      "path": "/opt/homebrew/Cellar/woof-doom/15.3.0/bin/woof",
+      "setupPath": "/opt/homebrew/Cellar/woof-doom/15.3.0/bin/woof-setup"
+    }
+  },
+
+  "profiles": [
+    {
+      "title": "Cripsy Doom",
+      "port": "crispy"
+    },
+    {
+      "title": "UZDoom (freelook, finite actor height)",
+      "port": "uzdoom",
+      "defaultSkill": 3
+    },
+    {
+      "title": "UZDoom (MBF21 strict compatibility)",
+      "port": "uzdoom",
+      "params": [
+        "+set compatflags -1785091888",
+        "+set compatflags2 13064",
+        "+set dmflags 262144"
+      ]
+    },
+    {
+      "title": "Woof!",
+      "port": "woof"
+    },
+    {
+      "title": "Woof! (ID24 features)",
+      "port": "woof",
+      "pwads": [
+        "id24res.wad"
+      ]
+    }
+  ]
+}

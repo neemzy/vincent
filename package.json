@@ -1,0 +1,16 @@
+{
+  "name": "vincent",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "overrides": {
+    "fstream": "^1.0.12",
+    "graceful-fs": "^4.2.11"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "unzip": "^0.1.11"
+  }
+}
