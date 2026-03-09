@@ -1,4 +1,5 @@
 const fs = require("fs");
+const path = require("path");
 const {exec} = require("child_process");
 const unzip = require("unzip");
 const express = require("express");
@@ -22,12 +23,15 @@ const knownWads = data.games.reduce((wads, game) => {
   });
 
   return wads;
-}, ["id24res.wad"]); // hidden because UZDoom autoloads it, Crispy Doom can't run it and I have a dedicated Woof! profile for it
+}, ["id24res.wad", "extras.wad"]); // hide ID24-esque resource WADs since capable source ports autoload those anyway
 
 // Expose all JSON
 app.get("/config", (req, res) => {
+  // (Re)read user config
+  const currentConfig = JSON.parse(fs.readFileSync(path.resolve(__dirname, "..", "config.json")));
+
   // Build list of available files in the user's WAD directory
-  const availableWads = fs.readdirSync(config.wadDir).reduce((wads, file) => {
+  const availableWads = fs.readdirSync(currentConfig.wadDir).reduce((wads, file) => {
     if (isWad(file) && !knownWads.includes(file)) {
       wads.push(file);
     }
@@ -36,7 +40,7 @@ app.get("/config", (req, res) => {
   }, []);
 
   res.setHeader("Content-Type", "application/json");
-  res.end(JSON.stringify({...data, ...config, availableWads}));
+  res.end(JSON.stringify({...data, ...currentConfig, availableWads}));
 });
 
 // Run command line

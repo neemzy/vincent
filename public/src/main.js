@@ -12,6 +12,7 @@ fetch("/config")
         games={config.games}
         skills={config.skills}
         defaultSkill={config.defaultSkill}
+        compLevels={config.compLevels}
         availableWads={config.availableWads}
       />
     );

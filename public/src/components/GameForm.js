@@ -1,20 +1,31 @@
-function GameForm({wadDir, profiles, games, skills, defaultSkill, availableWads}) {
-  const defaultSkillIndex = (profiles[0].defaultSkill || defaultSkill) - 1; // number to index
+function GameForm({wadDir, profiles, games, skills, defaultSkill, compLevels, availableWads}) {
   const [selectedProfile, selectProfile] = React.useState(0);
   const [selectedGame, selectGame] = React.useState(1); // default to Doom 2
   const [selectedEpisode, selectEpisode] = React.useState(0);
   const [isWarpEnabled, enableWarp] = React.useState(false);
   const [mapNumber, setMapNumber] = React.useState(1);
-  const [selectedSkill, selectSkill] = React.useState(defaultSkillIndex);
+  const [selectedSkill, selectSkill] = React.useState(profiles[0].defaultSkill || defaultSkill);
   const [isMusicEnabled, enableMusic] = React.useState(true);
-  const [isButtonEnabled, enableButton] = React.useState(true);
+  const [selectedCompLevel, selectCompLevel] = React.useState();
   const [selectedWads, selectWads] = React.useState([]);
+  const [isRunButtonEnabled, enableRunButton] = React.useState(true);
   const profileOptions = getTitleOptions(profiles);
   const gameOptions = getTitleOptions(games);
   const episodeOptions = getEpisodeOptions(selectedGame);
-  const skillOptions = skills.map((skill, index) => ({label: skill, value: index}));
+  const skillOptions = skills.map((skill, index) => ({label: skill, value: index + 1}));
   const isPortConfigurable = !!profiles[selectedProfile].port.setupPath;
 
+  // Filter compatibility modes by selected source port and IWAD
+  const compLevelOptions = React.useMemo(getCompLevelOptions, [selectedProfile, selectedGame]);
+
+  // Reset compatibility mode dropdown when a different source port or game is selected
+  React.useEffect(() => {
+    if (!compLevelOptions.find(option => option.value === selectedCompLevel)) { // meh
+      selectCompLevel(compLevelOptions[0].value);
+    }
+  }, [compLevelOptions]);
+
+  // Build command line
   const commandLine = React.useMemo(() => buildCommandLine(
     wadDir,
     profiles[selectedProfile],
@@ -22,13 +33,14 @@ function GameForm({wadDir, profiles, games, skills, defaultSkill, availableWads}
     games[selectedGame].episodes[selectedEpisode],
     selectedEpisode,
     isWarpEnabled ? mapNumber : 0,
-    selectedWads,
     selectedSkill,
+    compLevels.find(compLevel => compLevel.key === selectedCompLevel), // meh
+    selectedWads,
     isMusicEnabled
-  ), [selectedProfile, selectedGame, selectedEpisode, isWarpEnabled, mapNumber, selectedWads, selectedSkill, isMusicEnabled]);
+  ), [selectedProfile, selectedGame, selectedEpisode, isWarpEnabled, mapNumber, selectedSkill, selectedCompLevel, selectedWads, isMusicEnabled]);
 
   return (
-    <div className="min-h-screen pb-8 bg-cyan-950 text-sky-600">
+    <div className="min-h-screen py-8 bg-cyan-950 text-sky-600">
       <div className="doom-logo mx-auto"></div>
       <form className="max-w-4xl mt-16 mx-auto" onSubmit={event => handleRun(event, commandLine)}>
         <div className="max-w-lg mx-auto grid grid-cols-6 grid-flow-row">
@@ -88,14 +100,27 @@ function GameForm({wadDir, profiles, games, skills, defaultSkill, availableWads}
             <input type="checkbox" id="music" checked={isMusicEnabled} onChange={event => enableMusic(event.target.checked)} />
           </div>
         </div>
+        <div className="mt-8 max-w-lg mx-auto grid grid-cols-6 grid-flow-row">
+          <label htmlFor="compLevel" className="col-span-3 doom-font">Compatibility mode</label>
+          <Dropdown
+            id="compLevel"
+            className="col-span-3 text-sky-400"
+            options={compLevelOptions}
+            value={selectedCompLevel}
+            onChange={selectCompLevel}
+          />
+        </div>
         <WadList
           className="max-w-lg mt-8 mx-auto"
           wads={availableWads}
-          selectedWads={selectedWads}
-          onChange={selectWads}
+          selected={selectedWads}
+          onSelect={selectWads}
           onDelete={async wad => {
             await deleteWad(wad);
             window.location.reload();
+          }}
+          onApplyCompLevel={wad => {
+            switchToCompLevel("mbf21");
           }}
         />
         <div className="mt-16 flex items-center p-4 rounded-md bg-slate-800">
@@ -103,7 +128,7 @@ function GameForm({wadDir, profiles, games, skills, defaultSkill, availableWads}
           <button
             type="submit"
             className="ml-auto px-2 py-1 rounded-sm bg-sky-600 hover:bg-sky-400 text-slate-800 doom-font uppercase cursor-pointer"
-            disabled={!isButtonEnabled}
+            disabled={!isRunButtonEnabled}
           >Run</button>
         </div>
       </form>
@@ -121,30 +146,51 @@ function GameForm({wadDir, profiles, games, skills, defaultSkill, availableWads}
     }));
   }
 
+  function getCompLevelOptions() {
+    return compLevels.reduce((options, {key, label, iwads}) => {
+      iwads = iwads || [];
+
+      if ((
+        profileIsCompatible(profiles[selectedProfile], key)
+      ) && (
+        iwads.length === 0
+        // Exclude mismatching vanilla complevels
+        || iwads.includes(games[selectedGame].episodes[selectedEpisode].iwad)
+        || iwads.includes(games[selectedGame].iwad)
+      )) {
+        options.push({label, value: key});
+      }
+
+      return options;
+    }, []);
+  }
+
   function handleSelectProfile(profileIndex) {
     selectProfile(profileIndex);
-    selectSkill(profiles[profileIndex].defaultSkill ? profiles[profileIndex].defaultSkill - 1 : defaultSkillIndex); // number to index
+
+    if (profiles[profileIndex].defaultSkill) {
+      selectSkill(profiles[profileIndex].defaultSkill);
+    }
   }
 
   function handleSelectGame(gameIndex) {
     selectGame(gameIndex);
-    selectEpisode(0);
+    selectEpisode(0); // reset episode selection
   }
 
   function handleRun(event, commandLine) {
     event.preventDefault();
+    enableRunButton(false);
 
-    // Make it Michael J. Fox friendly
-    enableButton(false);
-    window.setTimeout(() => enableButton(true), 1000);
-
-    runCommandLine(commandLine);
+    runCommandLine(commandLine)
+      .then(() => enableRunButton(true));
   }
-}
 
-function getTitleOptions(collection) {
-  return collection.map(({title}, index) => ({
-    label: title,
-    value: index
-  }));
+  function switchToCompLevel(compLevel) {
+    if (!profileIsCompatible(profiles[selectedProfile], compLevel)) {
+      handleSelectProfile(Math.max(0, profiles.findIndex(profile => profileIsCompatible(profile, compLevel))));
+    }
+
+    selectCompLevel(compLevel);
+  }
 }

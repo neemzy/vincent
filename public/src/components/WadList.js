@@ -1,4 +1,4 @@
-function WadList({className, wads, selectedWads, onChange, onDelete}) {
+function WadList({className, wads, selected, onSelect, onDelete, onApplyCompLevel}) {
   const [wadUrl, setWadUrl] = React.useState("");
   const [isDownloading, setDownloading] = React.useState(false);
 
@@ -12,12 +12,13 @@ function WadList({className, wads, selectedWads, onChange, onDelete}) {
         {wads.map(wad => (
           <li key={wad} className="w-1/2 shrink-0 odd:pr-2 even:pl-2">
             <label className="flex items-center">
-              <input type="checkbox" checked={selectedWads.includes(wad)} onChange={() => toggleWad(wad)} />
+              <input type="checkbox" checked={selected.includes(wad)} onChange={() => toggleWad(wad)} />
               <span
-                className={`ml-2 truncate ${selectedWads.includes(wad) ? " text-sky-400" : ""}`}
+                className={`ml-2 truncate ${selected.includes(wad) ? " text-sky-400" : ""}`}
                 title={wad}
               >{wad}</span>
-              <button type="button" className="ml-auto cursor-pointer" onClick={() => onDelete(wad)}>🗑️</button>
+              <button type="button" className="ml-auto cursor-pointer" title="Use suggested compatibility mode: MBF21" onClick={() => onApplyCompLevel(wad)}>💽</button>
+              <button type="button" className="ml-1 cursor-pointer" title="" onClick={() => onDelete(wad)}>🗑️</button>
             </label>
           </li>
         ))}
@@ -45,9 +46,9 @@ function WadList({className, wads, selectedWads, onChange, onDelete}) {
   );
 
   function toggleWad(wad) {
-    onChange(selectedWads.includes(wad)
-      ? selectedWads.filter(selectedWad => selectedWad !== wad)
-      : [...selectedWads, wad]
+    onSelect(selected.includes(wad)
+      ? selected.filter(selectedWad => selectedWad !== wad)
+      : [...selected, wad]
     );
   }
 }

@@ -1,7 +1,7 @@
 {
   "games": [
     {
-      "title": "The Ultimate Doom",
+      "title": "Ultimate Doom",
       "iwad": "doom.wad",
       "episodes": [
         "Knee-Deep in the Dead",
@@ -73,5 +73,43 @@
     "Hurt Me Plenty",
     "Ultra-Violence",
     "Nightmare!"
+  ],
+
+  "compLevels": [
+    {
+      "key": "default",
+      "label": "None (source port defaults)"
+    },
+    {
+      "key": "mbf21",
+      "label": "MBF21"
+    },
+    {
+      "key": "mbf",
+      "label": "MBF"
+    },
+    {
+      "key": "boom",
+      "label": "Boom"
+    },
+    {
+      "key": "vanilla",
+      "label": "Vanilla"
+    },
+    {
+      "key": "vanilla_doom",
+      "label": "Vanilla (Ultimate Doom)",
+      "iwads": ["doom.wad", "freedoom1.wad"]
+    },
+    {
+      "key": "vanilla_doom2",
+      "label": "Vanilla (Doom II 1.9)",
+      "iwads": ["doom2.wad", "freedoom2.wad"]
+    },
+    {
+      "key": "vanilla_final",
+      "label": "Vanilla (Final Doom)",
+      "iwads": ["plutonia.wad", "tnt.wad"]
+    }
   ]
 }

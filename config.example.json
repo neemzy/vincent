@@ -1,11 +1,10 @@
 {
   "httpPort": 8666,
-  "wadDir": "/Users/user/storage/wads",
-  "defaultSkill": 4,
+  "wadDir": "/path/to/wads",
 
   "ports": {
     "uzdoom": {
-      "path": "/Applications/uzdoom.app/Contents/MacOS/uzdoom",
+      "path": "/path/to/uzdoom",
       "compLevels": {
         "default": "",
         "mbf21": [
@@ -30,19 +29,20 @@
         ]
       }
     },
-    "crispy": {
-      "path": "crispy-doom",
-      "setupPath": "crispy-doom-setup",
+    "dsda": {
+      "path": "/path/to/dsda-doom",
       "compLevels": {
-        "vanilla": "",
-        "vanilla_doom": "-gameversion ultimate",
-        "vanilla_doom2": "-gameversion 1.9",
-        "vanilla_final": "-gameversion final"
+        "mbf21": "-complevel 21",
+        "mbf": "-complevel 11",
+        "boom": "-complevel 9",
+        "vanilla_doom": "-complevel 3",
+        "vanilla_doom2": "-complevel 2",
+        "vanilla_final": "-complevel 4"
       }
     },
     "woof": {
-      "path": "woof",
-      "setupPath": "woof-setup",
+      "path": "/path/to/woof",
+      "setupPath": "/path/to/woof-setup",
       "compLevels": {
         "mbf21": "-complevel mbf21",
         "mbf": "-complevel mbf",
@@ -52,17 +52,33 @@
         "vanilla_doom2": "-complevel vanilla -gameversion 1.9",
         "vanilla_final": "-complevel vanilla -gameversion final"
       }
+    },
+    "chocolate": {
+      "path": "/path/to/chocolate-doom",
+      "setupPath": "/path/to/chocolate-doom-setup",
+      "compLevels": {
+        "vanilla": "",
+        "vanilla_doom": "-gameversion ultimate",
+        "vanilla_doom2": "-gameversion 1.9",
+        "vanilla_final": "-gameversion final"
+      }
     }
   },
 
   "profiles": [
     {
-      "title": "Crispy Doom",
-      "port": "crispy"
+      "title": "Chocolate Doom",
+      "port": "chocolate"
     },
     {
       "title": "Woof!",
       "port": "woof"
+    },
+    {
+      "title": "DSDA Doom (UV -fast)",
+      "port": "dsda",
+      "defaultSkill": 4,
+      "params": "-fast"
     },
     {
       "title": "UZDoom",
