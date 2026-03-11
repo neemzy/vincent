@@ -3,6 +3,8 @@
     {
       "title": "Ultimate Doom",
       "iwad": "doom.wad",
+      "usesExMyFormat": true,
+      "maxMapNumber": 9,
       "episodes": [
         "Knee-Deep in the Dead",
         "The Shores of Hell",
@@ -13,7 +15,7 @@
           "pwads": ["sigil.wad"]
         },
         {
-          "title": "Sigil 2",
+          "title": "Sigil II",
           "pwads": ["sigil2.wad"]
         }
       ]
@@ -21,16 +23,19 @@
     {
       "title": "Doom II",
       "iwad": "doom2.wad",
+      "maxMapNumber": 32,
       "episodes": [
         "Hell on Earth",
         {
           "title": "No Rest for the Living",
-          "pwads": ["nerve.wad"]
+          "pwads": ["nerve.wad"],
+          "maxMapNumber": 9
         }
       ]
     },
     {
       "title": "Final Doom",
+      "maxMapNumber": 32,
       "episodes": [
         {
           "title": "The Plutonia Experiment",
@@ -45,6 +50,8 @@
     {
       "title": "Legacy of Rust",
       "iwad": "doom2.wad",
+      "hasMapZero": true,
+      "maxMapNumber": 7,
       "pwads": ["id1.wad"],
       "episodes": [
         "The Vulcan Abyss",
@@ -54,6 +61,8 @@
     {
       "title": "Freedoom: Phase 1",
       "iwad": "freedoom1.wad",
+      "usesExMyFormat": true,
+      "maxMapNumber": 9,
       "episodes": [
         "Outpost Outbreak",
         "Military Labs",
@@ -63,7 +72,8 @@
     },
     {
       "title": "Freedoom: Phase 2",
-      "iwad": "freedoom2.wad"
+      "iwad": "freedoom2.wad",
+      "maxMapNumber": 32
     }
   ],
 
@@ -81,30 +91,52 @@
       "label": "None (source port defaults)"
     },
     {
+      "key": "id24",
+      "label": "ID24",
+      "lineTypes": [[2048, 4095]],
+      "thingTypes": [[-28672, -28619]]
+    },
+    {
       "key": "mbf21",
-      "label": "MBF21"
+      "label": "MBF21",
+      "lineTypes": [[1024, 1026]],
+      "lineFlags": [[11, 13]],
+      "sectorTypes": [[4096, 16383]]
     },
     {
       "key": "mbf",
-      "label": "MBF"
+      "label": "MBF",
+      "lineTypes": [271, 272],
+      "thingTypes": [888],
+      "thingFlags": [7]
     },
     {
       "key": "boom",
-      "label": "Boom"
+      "label": "Boom",
+      "lineTypes": [78, 85, [142, 269], [8192, 32767]],
+      "lineFlags": [9],
+      "sectorTypes": [[32, 1023]],
+      "thingTypes": [5001, 5002],
+      "thingFlags": [5, 6]
     },
     {
       "key": "vanilla",
-      "label": "Vanilla"
-    },
-    {
-      "key": "vanilla_doom",
-      "label": "Vanilla (Ultimate Doom)",
-      "iwads": ["doom.wad", "freedoom1.wad"]
+      "label": "Vanilla",
+      "lineTypes": [[1, 77], [79, 84], [86, 141]],
+      "lineFlags": [[0, 8]],
+      "sectorTypes": [[1, 5], [7, 14], 16, 17],
+      "thingTypes": [[1, 89], [2001, 2008], [2010, 2015], 2018, 2019, [2022, 2026], 2028, 2035, [2045, 2049], [3001, 3006]],
+      "thingFlags": [[0, 4]]
     },
     {
       "key": "vanilla_doom2",
       "label": "Vanilla (Doom II 1.9)",
       "iwads": ["doom2.wad", "freedoom2.wad"]
+    },
+    {
+      "key": "vanilla_udoom",
+      "label": "Vanilla (Ultimate Doom)",
+      "iwads": ["doom.wad", "freedoom1.wad"]
     },
     {
       "key": "vanilla_final",

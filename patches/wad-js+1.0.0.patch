@@ -1,0 +1,302 @@
+diff --git a/node_modules/wad-js/.DS_Store b/node_modules/wad-js/.DS_Store
+new file mode 100644
+index 0000000..9a874b5
+Binary files /dev/null and b/node_modules/wad-js/.DS_Store differ
+diff --git a/node_modules/wad-js/src/.DS_Store b/node_modules/wad-js/src/.DS_Store
+new file mode 100644
+index 0000000..5f6dacb
+Binary files /dev/null and b/node_modules/wad-js/src/.DS_Store differ
+diff --git a/node_modules/wad-js/src/wad.js b/node_modules/wad-js/src/wad.js
+index 3c3cccf..a85e43c 100644
+--- a/node_modules/wad-js/src/wad.js
++++ b/node_modules/wad-js/src/wad.js
+@@ -1,6 +1,7 @@
+ var Wad = {
+ 
+-    onProgress : null,
++    //onProgress : null,
++    onProgress : () => {},
+     onLoad : null,
+     ident : "",
+     numlumps : -1,
+@@ -11,7 +12,7 @@ var Wad = {
+     errormsg: null,
+ 
+     error : function (msg) {
+-	    self.errormsg = msg;
++        this.errormsg = msg;
+     },
+ 
+     loadURL : function (url) {
+@@ -31,79 +32,84 @@ var Wad = {
+     load : function (blob) {
+         var self = this;
+ 
+-    	self.lumps = [];
++        self.lumps = [];
+ 
+-    	var offset = 0;
+-    	var chunkSize = -1;
++        var offset = 0;
++        var chunkSize = -1;
+ 
+         var reader = new FileReader();
+-    	reader.readAsArrayBuffer(blob);
+-    	reader.onprogress = self.onProgress;
+-
+-    	reader.onload = function(e) {
+-    		self.data = e.target.result;
+-
+-    		// header reading
+-    		var headerReader = new DataView(e.target.result);
+-    		for (var i = 0; i < 4; i++) self.ident += String.fromCharCode(headerReader.getUint8(i));
+-    		if (self.ident != "IWAD" && self.ident != "PWAD") {
+-    		    self.error("Not a valid WAD file.");
+-    	            self.onLoad();
+-    		} else {
+-    		    self.numlumps = headerReader.getInt32(4, true);
+-    		    self.dictpos = headerReader.getInt32(8, true);
+-    		    offset = self.dictpos;
+-    		    chunkSize = 128;
+-
+-    		    chunkReaderBlock(self.dictpos, chunkSize, blob);
+-    		}
+-    	}
+-
+-    	var nextChunk = function(e) {
+-    	   offset += e.target.result.byteLength;
+-
+-    	   var dataReader = new DataView(e.target.result);
+-
+-    	   for (var i = 0; i < dataReader.byteLength / 16; i++) {
+-    		   var p = i * 16;
+-    		   var lumpPos = dataReader.getInt32(p, true);
+-    		   var lumpSize = dataReader.getInt32(p + 4, true);
+-    		   var lumpName = "";
+-    		   for (j = p + 8; j < p + 16; j++) {
+-    		       if (dataReader.getUint8(j) != 0) {
+-    			   lumpName += String.fromCharCode(dataReader.getUint8(j));
+-    		       }
+-    		   }
+-
+-    		   lumpEntry = { 
+-    		       pos : lumpPos,
+-    		       size : lumpSize,
+-    		       name : lumpName
+-    		   }
+-    		   self.lumps.push(lumpEntry);
+-    	   }
+-    	  
+-           if (offset >= blob.size) {
+-		self.onProgress();
+-    		self.onLoad();
+-    		self.playpal = Object.create(Playpal);
+-    		if (self.lumpExists("PLAYPAL")) {
+-    			self.playpal.load(wad.getLumpByName("PLAYPAL"));
+-    		}
+-    	   	return;
+-    	   }
+-
+-    	   chunkReaderBlock(offset, chunkSize, blob)
+-    	}
+-
+-    	chunkReaderBlock = function(_offset, chunkSize, data) {
+-    	    var r = new FileReader();
+-    	    var b = data.slice(_offset, _offset + chunkSize);
+-    	    r.onload = nextChunk; 
+-    	    r.onprogress = self.onProgress;
+-    	    r.readAsArrayBuffer(b);
+-    	}
++        reader.readAsArrayBuffer(blob);
++        reader.onprogress = self.onProgress;
++
++        reader.onload = function(e) {
++            self.data = e.target.result;
++
++            // header reading
++            //var headerReader = new DataView(e.target.result);
++            var headerReader = new DataView(toArrayBuffer(e.target.result));
++
++            for (var i = 0; i < 4; i++) self.ident += String.fromCharCode(headerReader.getUint8(i));
++            if (self.ident != "IWAD" && self.ident != "PWAD") {
++                self.error("Not a valid WAD file.");
++                self.onLoad();
++            } else {
++                self.numlumps = headerReader.getInt32(4, true);
++                self.dictpos = headerReader.getInt32(8, true);
++                offset = self.dictpos;
++                chunkSize = 128;
++
++                chunkReaderBlock(self.dictpos, chunkSize, blob);
++            }
++        }
+ 
++        var nextChunk = function(e) {
++            offset += e.target.result.byteLength;
++
++            //var dataReader = new DataView(e.target.result);
++            var dataReader = new DataView(toArrayBuffer(e.target.result));
++
++            for (var i = 0; i < dataReader.byteLength / 16; i++) {
++                var p = i * 16;
++                var lumpPos = dataReader.getInt32(p, true);
++                var lumpSize = dataReader.getInt32(p + 4, true);
++                var lumpName = "";
++                for (j = p + 8; j < p + 16; j++) {
++                  if (dataReader.getUint8(j) != 0) {
++                    lumpName += String.fromCharCode(dataReader.getUint8(j));
++                  }
++                }
++
++                lumpEntry = {
++                  pos : lumpPos,
++                  size : lumpSize,
++                  name : lumpName
++                }
++                self.lumps.push(lumpEntry);
++            }
++
++            //if (offset >= blob.size) {
++            if (offset >= blob.buffer.length) {
++              self.onProgress();
++              self.onLoad();
++              self.playpal = Object.create(Playpal);
++              if (self.lumpExists("PLAYPAL")) {
++                self.playpal.load(wad.getLumpByName("PLAYPAL"));
++              }
++              return;
++            }
++
++            chunkReaderBlock(offset, chunkSize, blob)
++        }
++
++        chunkReaderBlock = function(_offset, chunkSize, data) {
++            var r = new FileReader();
++            //var b = data.slice(_offset, _offset + chunkSize);
++            var b = data.buffer.slice(_offset, _offset + chunkSize);
++            r.onload = nextChunk;
++            r.onprogress = self.onProgress;
++            //r.readAsArrayBuffer(b);
++            r.readAsArrayBuffer({name:"osef",buffer:b});
++        }
+     },
+ 
+     save : function () {
+diff --git a/node_modules/wad-js/src/wad/detectlump.js b/node_modules/wad-js/src/wad/detectlump.js
+index 804b149..850d1e4 100644
+--- a/node_modules/wad-js/src/wad/detectlump.js
++++ b/node_modules/wad-js/src/wad/detectlump.js
+@@ -19,7 +19,8 @@ Wad.detectLumpType = function (index) {
+ 
+     //data-based detection
+     if (this.lumps[index].size != 0) {
+-        var dv = new DataView(this.data, this.lumps[index].pos);
++        //var dv = new DataView(this.data, this.lumps[index].pos);
++        var dv = new DataView(toArrayBuffer(this.data), this.lumps[index].pos);
+         if (headerCheck(dv, 'MThd')) return MIDI;
+         if (headerCheck(dv, 'ID3')) return MP3;
+         if (headerCheck(dv, 'MUS')) return MUS;
+diff --git a/node_modules/wad-js/src/wad/mapdata.js b/node_modules/wad-js/src/wad/mapdata.js
+index 03c40a1..8262b6e 100644
+--- a/node_modules/wad-js/src/wad/mapdata.js
++++ b/node_modules/wad-js/src/wad/mapdata.js
+@@ -114,7 +114,8 @@ var MapData = {
+     parseThings : function(lump) {
+         this.things = [];
+         var entryLen = 10;
+-        var dv = new DataView(lump);
++        //var dv = new DataView(lump);
++        var dv = new DataView(toArrayBuffer(lump));
+         var len = dv.byteLength / entryLen;
+         for (var i = 0; i < len; i++) {
+             r = Object.create(Thing);
+@@ -130,7 +131,8 @@ var MapData = {
+     parseVertexes : function(lump) {
+         this.vertexes = [];
+         var entryLen = 4;
+-        var dv = new DataView(lump);
++        //var dv = new DataView(lump);
++        var dv = new DataView(toArrayBuffer(lump));
+         var len = dv.byteLength / entryLen;
+         for (var i = 0; i < len; i++) {
+             r = Object.create(Vertex);
+@@ -143,7 +145,8 @@ var MapData = {
+     parseLinedefs : function(lump) {
+         this.linedefs = [];
+         var entryLen = 14;
+-        var dv = new DataView(lump);
++        //var dv = new DataView(lump);
++        var dv = new DataView(toArrayBuffer(lump));
+         var len = dv.byteLength / entryLen;
+         for (var i = 0; i < len; i++) {
+             r = Object.create(Linedef);
+@@ -161,7 +164,8 @@ var MapData = {
+     parseSidedefs : function(lump) {
+         this.sidedefs = [];
+         var entryLen = 30;
+-        var dv = new DataView(lump);
++        //var dv = new DataView(lump);
++        var dv = new DataView(toArrayBuffer(lump));
+         var len = dv.byteLength / entryLen;
+         for (var i = 0; i < len; i++) {
+             r = Object.create(Sidedef);
+@@ -178,7 +182,8 @@ var MapData = {
+     parseSectors : function(lump) {
+         this.sectors = [];
+         var entryLen = 26;
+-        var dv = new DataView(lump);
++        //var dv = new DataView(lump);
++        var dv = new DataView(toArrayBuffer(lump));
+         var len = dv.byteLength / entryLen;
+         for (var i = 0; i < len; i++) {
+             r = Object.create(Sector);
+@@ -196,7 +201,8 @@ var MapData = {
+     parseSegs : function(lump) {
+         this.segs = [];
+         var entryLen = 12;
+-        var dv = new DataView(lump);
++        //var dv = new DataView(lump);
++        var dv = new DataView(toArrayBuffer(lump));
+         var len = dv.byteLength / entryLen;
+         for (var i = 0; i < len; i++) {
+             r = Object.create(Seg);
+@@ -213,7 +219,8 @@ var MapData = {
+     parseSsectors : function(lump) {
+         this.ssectors = [];
+         var entryLen = 4;
+-        var dv = new DataView(lump);
++        //var dv = new DataView(lump);
++        var dv = new DataView(toArrayBuffer(lump));
+         var len = dv.byteLength / entryLen;
+         for (var i = 0; i < len; i++) {
+             r = Object.create(Subsector);
+@@ -226,7 +233,8 @@ var MapData = {
+     parseNodes : function(lump) {
+         this.nodes = [];
+         var entryLen = 28;
+-        var dv = new DataView(lump);
++        //var dv = new DataView(lump);
++        var dv = new DataView(toArrayBuffer(lump));
+         var len = dv.byteLength / entryLen;
+         for (var i = 0; i < len; i++) {
+             r = Object.create(Node);
+@@ -255,7 +263,8 @@ var MapData = {
+     parseHexenThings : function(lump) {
+         this.things = [];
+         var entryLen = 20;
+-        var dv = new DataView(lump);
++        //var dv = new DataView(lump);
++        var dv = new DataView(toArrayBuffer(lump));
+         var len = dv.byteLength / entryLen;
+         for (var i = 0; i < len; i++) {
+             r = Object.create(HexenThing);
+@@ -277,7 +286,8 @@ var MapData = {
+     parseHexenLinedefs : function(lump) {
+         this.linedefs = [];
+         var entryLen = 16;
+-        var dv = new DataView(lump);
++        //var dv = new DataView(lump);
++        var dv = new DataView(toArrayBuffer(lump));
+         var len = dv.byteLength / entryLen;
+         for (var i = 0; i < len; i++) {
+             r = Object.create(HexenLinedef);

@@ -6,8 +6,9 @@ const express = require("express");
 const data = require("../data");
 const config = require("../config");
 const addWads = require("./addWads");
+const detectCompLevel = require("./detectCompLevel");
 const downloadWad = require("./downloadWad");
-const isWad = require("./isWad");
+const {isWad, isWadOrPk3} = require("./isWad");
 
 // Express app
 const app = express();
@@ -25,15 +26,22 @@ const knownWads = data.games.reduce((wads, game) => {
   return wads;
 }, ["id24res.wad", "extras.wad"]); // hide ID24-esque resource WADs since capable source ports autoload those anyway
 
-// Expose all JSON
-app.get("/config", (req, res) => {
+// Expose all JSON (internal and user)
+app.get("/config", async (req, res) => {
   // (Re)read user config
   const currentConfig = JSON.parse(fs.readFileSync(path.resolve(__dirname, "..", "config.json")));
 
-  // Build list of available files in the user's WAD directory
-  const availableWads = fs.readdirSync(currentConfig.wadDir).reduce((wads, file) => {
-    if (isWad(file) && !knownWads.includes(file)) {
-      wads.push(file);
+  // Build list of available files in the user's WAD directory,
+  // and detect complevels for actual .wad files
+  const availableWads = await fs.readdirSync(currentConfig.wadDir).reduce(async (wads, file) => {
+    if (isWadOrPk3(file) && !knownWads.includes(file)) {
+      const wad = {file};
+
+      if (isWad(file)) {
+        wad.compLevel = await detectCompLevel(path.resolve(currentConfig.wadDir, file));
+      }
+
+      (await wads).push(wad);
     }
 
     return wads;

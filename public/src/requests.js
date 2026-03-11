@@ -15,9 +15,5 @@ function downloadWad(url) {
 }
 
 function deleteWad(wadFile) {
-  if (!confirm(`Delete ${wadFile}?`)) {
-    return;
-  }
-
   return fetch(`/delete?file=${wadFile}`);
 }

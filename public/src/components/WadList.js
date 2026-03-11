@@ -9,19 +9,26 @@ function WadList({className, wads, selected, onSelect, onDelete, onApplyCompLeve
         <span className="doom-font bg-cyan-950 mx-[-0.375em] px-[0.375em]">Additional PWADs</span>
       </div>
       <ul className="w-full inline-flex flex-wrap">
-        {wads.map(wad => (
-          <li key={wad} className="w-1/2 shrink-0 odd:pr-2 even:pl-2">
-            <label className="flex items-center">
-              <input type="checkbox" checked={selected.includes(wad)} onChange={() => toggleWad(wad)} />
-              <span
-                className={`ml-2 truncate ${selected.includes(wad) ? " text-sky-400" : ""}`}
-                title={wad}
-              >{wad}</span>
-              <button type="button" className="ml-auto cursor-pointer" title="Use suggested compatibility mode: MBF21" onClick={() => onApplyCompLevel(wad)}>💽</button>
-              <button type="button" className="ml-1 cursor-pointer" title="" onClick={() => onDelete(wad)}>🗑️</button>
-            </label>
-          </li>
-        ))}
+        {wads.map(({file, compLevel}) => {
+          return (
+            <li key={file} className="w-1/2 shrink-0 odd:pr-2 even:pl-2">
+              <label className="flex items-center">
+                <input type="checkbox" checked={selected.includes(file)} onChange={() => toggleWad(file)} />
+                <span
+                  className={`ml-2 truncate ${selected.includes(file) ? " text-sky-400" : ""}`}
+                  title={file}
+                >{file}</span>
+                <button
+                  type="button"
+                  className="ml-auto cursor-pointer"
+                  title="Autoselect settings for this WAD"
+                  onClick={() => onApplyCompLevel(compLevel)}
+                >💽</button>
+                <button type="button" className="ml-1 cursor-pointer" title="" onClick={() => onDelete(file)}>🗑️</button>
+              </label>
+            </li>
+          );
+        })}
       </ul>
       <div className="mt-2 pb-3 flex">
         <input

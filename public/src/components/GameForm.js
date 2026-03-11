@@ -9,14 +9,17 @@ function GameForm({wadDir, profiles, games, skills, defaultSkill, compLevels, av
   const [selectedCompLevel, selectCompLevel] = React.useState();
   const [selectedWads, selectWads] = React.useState([]);
   const [isRunButtonEnabled, enableRunButton] = React.useState(true);
+  const [isCopyAlertVisible, showCopyAlert] = React.useState(false);
   const profileOptions = getTitleOptions(profiles);
+  const isPortConfigurable = !!profiles[selectedProfile].port.setupPath;
   const gameOptions = getTitleOptions(games);
   const episodeOptions = getEpisodeOptions(selectedGame);
   const skillOptions = skills.map((skill, index) => ({label: skill, value: index + 1}));
-  const isPortConfigurable = !!profiles[selectedProfile].port.setupPath;
-
-  // Filter compatibility modes by selected source port and IWAD
   const compLevelOptions = React.useMemo(getCompLevelOptions, [selectedProfile, selectedGame]);
+  const minMapNumber = React.useMemo(() => games[selectedGame].hasMapZero ? 0 : 1, [selectedGame]);
+
+  const maxMapNumber = React.useMemo(() => games[selectedGame].episodes[selectedEpisode].maxMapNumber
+    || games[selectedGame].maxMapNumber, [selectedGame, selectedEpisode]);
 
   // Reset compatibility mode dropdown when a different source port or game is selected
   React.useEffect(() => {
@@ -31,8 +34,8 @@ function GameForm({wadDir, profiles, games, skills, defaultSkill, compLevels, av
     profiles[selectedProfile],
     games[selectedGame],
     games[selectedGame].episodes[selectedEpisode],
-    selectedEpisode,
-    isWarpEnabled ? mapNumber : 0,
+    parseInt(selectedEpisode) + 1,
+    isWarpEnabled ? mapNumber : undefined,
     selectedSkill,
     compLevels.find(compLevel => compLevel.key === selectedCompLevel), // meh
     selectedWads,
@@ -62,14 +65,20 @@ function GameForm({wadDir, profiles, games, skills, defaultSkill, compLevels, av
             </div>
           )}
           <label htmlFor="game" className="col-span-2 doom-font">Game</label>
-          <Dropdown id="game" className="col-span-4 text-sky-400" options={gameOptions} value={selectedGame} onChange={handleSelectGame} />
+          <Dropdown
+            id="game"
+            className="col-span-4 text-sky-400"
+            options={gameOptions}
+            value={selectedGame}
+            onChange={handleSelectGame}
+          />
           <label htmlFor="episode" className="col-span-2 doom-font">Episode</label>
           <Dropdown
             id="episode"
             className="col-span-4 text-sky-400"
             options={episodeOptions}
             value={selectedEpisode}
-            onChange={selectEpisode}
+            onChange={handleSelectEpisode}
           />
           <label htmlFor="warp" className="col-span-2 doom-font">Start game</label>
           <div className="col-span-4">
@@ -81,10 +90,16 @@ function GameForm({wadDir, profiles, games, skills, defaultSkill, compLevels, av
             id="map"
             className="col-span-4 text-sky-400 disabled:text-slate-600"
             disabled={!isWarpEnabled}
-            min="1"
-            max="99"
+            min={minMapNumber}
+            max={maxMapNumber}
             value={mapNumber}
-            onChange={event => setMapNumber(event.target.value)}
+            onChange={event => {
+              const value = parseInt(event.target.value);
+
+              if (!isNaN(value)) {
+                setMapNumber(Math.min(maxMapNumber, Math.max(minMapNumber, value)));
+              }
+            }}
           />
           <label htmlFor="skill" className={`col-span-2 doom-font${isWarpEnabled ? "" : " text-slate-600"}`}>Skill level</label>
           <Dropdown
@@ -116,21 +131,24 @@ function GameForm({wadDir, profiles, games, skills, defaultSkill, compLevels, av
           selected={selectedWads}
           onSelect={selectWads}
           onDelete={async wad => {
+            if (!confirm(`Delete ${wad}?`)) {
+              return;
+            }
+
             await deleteWad(wad);
             window.location.reload();
           }}
-          onApplyCompLevel={wad => {
-            switchToCompLevel("mbf21");
-          }}
+          onApplyCompLevel={switchToCompLevel}
         />
         <div className="mt-16 flex items-center p-4 rounded-md bg-slate-800">
-          <span className="pr-4 font-mono text-xs text-slate-200">{commandLine}</span>
+          <span className="pr-4 font-mono text-xs text-slate-200 cursor-pointer" onClick={copyCommandLine}>{commandLine}</span>
           <button
             type="submit"
             className="ml-auto px-2 py-1 rounded-sm bg-sky-600 hover:bg-sky-400 text-slate-800 doom-font uppercase cursor-pointer"
             disabled={!isRunButtonEnabled}
           >Run</button>
         </div>
+        <div className={`${isCopyAlertVisible ? "" : "hidden "}mt-2 text-center text-sm text-sky-400`}>Copied to clipboard!</div>
       </form>
     </div>
   );
@@ -146,6 +164,7 @@ function GameForm({wadDir, profiles, games, skills, defaultSkill, compLevels, av
     }));
   }
 
+  // Filter compatibility modes by selected source port and IWAD
   function getCompLevelOptions() {
     return compLevels.reduce((options, {key, label, iwads}) => {
       iwads = iwads || [];
@@ -173,9 +192,16 @@ function GameForm({wadDir, profiles, games, skills, defaultSkill, compLevels, av
     }
   }
 
+  // Reset episode when game changes
   function handleSelectGame(gameIndex) {
     selectGame(gameIndex);
-    selectEpisode(0); // reset episode selection
+    handleSelectEpisode(0);
+  }
+
+  // Reset map number when episode changes
+  function handleSelectEpisode(episodeIndex) {
+    selectEpisode(episodeIndex);
+    setMapNumber(1);
   }
 
   function handleRun(event, commandLine) {
@@ -187,10 +213,24 @@ function GameForm({wadDir, profiles, games, skills, defaultSkill, compLevels, av
   }
 
   function switchToCompLevel(compLevel) {
-    if (!profileIsCompatible(profiles[selectedProfile], compLevel)) {
-      handleSelectProfile(Math.max(0, profiles.findIndex(profile => profileIsCompatible(profile, compLevel))));
+    if (compLevel === selectedCompLevel) {
+      return;
     }
 
+    // Just assume source ports are registered from most strict to least strict (which is encouraged in the docs)
+    //if (!profileIsCompatible(profiles[selectedProfile], compLevel)) {
+      handleSelectProfile(Math.max(0, profiles.findIndex(profile => profileIsCompatible(profile, compLevel))));
+    //}
+
     selectCompLevel(compLevel);
+  }
+
+  function copyCommandLine() {
+    window.navigator.clipboard.writeText(commandLine);
+    showCopyAlert(true);
+
+    window.setTimeout(() => {
+      showCopyAlert(false);
+    }, 1500);
   }
 }

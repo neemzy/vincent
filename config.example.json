@@ -35,8 +35,8 @@
         "mbf21": "-complevel 21",
         "mbf": "-complevel 11",
         "boom": "-complevel 9",
-        "vanilla_doom": "-complevel 3",
         "vanilla_doom2": "-complevel 2",
+        "vanilla_udoom": "-complevel 3",
         "vanilla_final": "-complevel 4"
       }
     },
@@ -48,18 +48,18 @@
         "mbf": "-complevel mbf",
         "boom": "-complevel boom",
         "vanilla": "-complevel vanilla",
-        "vanilla_doom": "-complevel vanilla -gameversion ultimate",
         "vanilla_doom2": "-complevel vanilla -gameversion 1.9",
+        "vanilla_udoom": "-complevel vanilla -gameversion ultimate",
         "vanilla_final": "-complevel vanilla -gameversion final"
       }
     },
-    "chocolate": {
-      "path": "/path/to/chocolate-doom",
-      "setupPath": "/path/to/chocolate-doom-setup",
+    "crispy": {
+      "path": "/path/to/crispy-doom",
+      "setupPath": "/path/to/crispy-doom-setup",
       "compLevels": {
         "vanilla": "",
-        "vanilla_doom": "-gameversion ultimate",
         "vanilla_doom2": "-gameversion 1.9",
+        "vanilla_udoom": "-gameversion ultimate",
         "vanilla_final": "-gameversion final"
       }
     }
@@ -67,18 +67,16 @@
 
   "profiles": [
     {
-      "title": "Chocolate Doom",
-      "port": "chocolate"
+      "title": "Crispy Doom",
+      "port": "crispy"
     },
     {
       "title": "Woof!",
       "port": "woof"
     },
     {
-      "title": "DSDA Doom (UV -fast)",
-      "port": "dsda",
-      "defaultSkill": 4,
-      "params": "-fast"
+      "title": "DSDA Doom",
+      "port": "dsda"
     },
     {
       "title": "UZDoom",

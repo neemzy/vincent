@@ -1,8 +1,9 @@
 {
   "name": "vincent",
+  "description": "Vincent - Doom Launcher",
   "private": true,
-  "main": "server.js",
   "scripts": {
+    "postinstall": "patch-package",
     "start": "node src/server.js"
   },
   "overrides": {
@@ -11,6 +12,11 @@
   },
   "dependencies": {
     "express": "^5.2.1",
-    "unzip": "^0.1.11"
+    "filereader": "^0.10.3",
+    "unzip": "^0.1.11",
+    "wad-js": "github:jmickle66666666/wad-js"
+  },
+  "devDependencies": {
+    "patch-package": "^8.0.1"
   }
 }

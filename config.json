@@ -34,10 +34,7 @@
       "path": "crispy-doom",
       "setupPath": "crispy-doom-setup",
       "compLevels": {
-        "vanilla": "",
-        "vanilla_doom": "-gameversion ultimate",
-        "vanilla_doom2": "-gameversion 1.9",
-        "vanilla_final": "-gameversion final"
+        "vanilla": ""
       }
     },
     "woof": {
@@ -47,10 +44,7 @@
         "mbf21": "-complevel mbf21",
         "mbf": "-complevel mbf",
         "boom": "-complevel boom",
-        "vanilla": "-complevel vanilla",
-        "vanilla_doom": "-complevel vanilla -gameversion ultimate",
-        "vanilla_doom2": "-complevel vanilla -gameversion 1.9",
-        "vanilla_final": "-complevel vanilla -gameversion final"
+        "vanilla": "-complevel vanilla"
       }
     }
   },

@@ -3,7 +3,7 @@ const path = require("path");
 const {Readable} = require("stream");
 const {finished} = require("stream/promises");
 const unzip = require("unzip");
-const isWad = require("./isWad");
+const {isWadOrPk3} = require("./isWad");
 
 async function downloadWad(url, wadDir) {
   const tmpFolder = path.resolve(wadDir, url.split("/").pop()).replace(/\.zip$/, "");
@@ -14,7 +14,7 @@ async function downloadWad(url, wadDir) {
 
   // Move relevant file(s) to their proper location
   await Promise.all(fs.readdirSync(tmpFolder).reduce((promises, file) => {
-    if (isWad(file)) {
+    if (isWadOrPk3(file)) {
       promises.push(new Promise((resolve, reject) => {
         fs.rename(
           path.resolve(tmpFolder, file),

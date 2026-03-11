@@ -5,11 +5,11 @@ function getTitleOptions(collection) {
   }));
 }
 
-function buildCommandLine(wadDir, profile, game, episode, episodeIndex, mapNumber, skill, compLevel, pWads, isMusicEnabled) {
+function buildCommandLine(wadDir, profile, game, episode, episodeNumber, mapNumber, skill, compLevel, pWads, isMusicEnabled) {
   const baseParams = {
     ...buildWadParams(wadDir, game, episode, pWads),
-    ...(mapNumber > 0 ? {
-      warp: getWarpValue(game, parseInt(episodeIndex) + 1, mapNumber),
+    ...(!isNaN(mapNumber) ? {
+      warp: getWarpValue(game, episodeNumber, mapNumber),
       skill
     } : {}),
     nomusic: !isMusicEnabled
@@ -34,16 +34,25 @@ function getWarpValue(game, episodeNumber, mapNumber) {
   const iwad = (game.iwad || "").toLowerCase();
   const pwads = game.pwads || [];
 
-  // Doom/Freedoom 1: ExMy format
-  if (["doom.wad", "freedoom1.wad"].includes(iwad)) {
+  // ExMy format
+  if (game.usesExMyFormat) {
     return `${episodeNumber} ${mapNumber}`;
   }
 
-  // Legacy of Rust: ExMy format but weird, also not really
-  if (pwads.includes("id1.wad") && episodeNumber === 2 && mapNumber < 8) {
-    return mapNumber + 7;
+  // Legacy of Rust: ExMy format but weird (also not really)
+  if (pwads.includes("id1.wad")) {
+    // Secrets levels: ExM0 -> MAPx+14 (E1M0 -> MAP15, E2M0 -> MAP16)
+    if (mapNumber === 0) {
+      return episodeNumber + 14;
+    }
+
+    // E2My -> MAPy+7 (E2M1 -> MAP08, ..., E2M7 -> MAP14)
+    if (episodeNumber === 2 && mapNumber < 8) {
+      return mapNumber + 7;
+    }
   }
 
+  //MAPy format
   return mapNumber;
 }
 
