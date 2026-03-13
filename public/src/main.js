@@ -13,6 +13,7 @@ fetch("/config")
         skills={config.skills}
         defaultSkill={config.defaultSkill}
         compLevels={config.compLevels}
+        knownWads={config.knownWads}
         availableWads={config.availableWads}
       />
     );

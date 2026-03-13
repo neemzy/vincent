@@ -5,7 +5,7 @@
 
   "ports": {
     "uzdoom": {
-      "path": "/Applications/uzdoom.app/Contents/MacOS/uzdoom",
+      "path": "uzdoom",
       "compLevels": {
         "default": "",
         "mbf21": [

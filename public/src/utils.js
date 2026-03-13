@@ -1,13 +1,14 @@
 function getTitleOptions(collection) {
-  return collection.map(({title}, index) => ({
-    label: title,
-    value: index
+  return collection.map((item, index) => ({
+    label: item.title || item,
+    value: index,
+    disabled: !!item.disabled
   }));
 }
 
-function buildCommandLine(wadDir, profile, game, episode, episodeNumber, mapNumber, skill, compLevel, pWads, isMusicEnabled) {
+function buildCommandLine(wadDir, baseFiles, profile, game, episode, episodeNumber, mapNumber, skill, compLevel, pWads, isMusicEnabled) {
   const baseParams = {
-    ...buildWadParams(wadDir, game, episode, pWads),
+    ...buildWadParams(wadDir, baseFiles, game, episode, pWads),
     ...(!isNaN(mapNumber) ? {
       warp: getWarpValue(game, episodeNumber, mapNumber),
       skill
@@ -23,10 +24,14 @@ function buildCommandLine(wadDir, profile, game, episode, episodeNumber, mapNumb
   ].join(" ").replace(/\s+/, " ").trim();
 }
 
-function buildWadParams(wadDir, game, episode, pWads) {
+function buildWadParams(wadDir, baseFiles, game, episode, pWads) {
   return {
-    iwad: formatWad(wadDir, episode.iwad || game.iwad),
-    file: [...formatWads(wadDir, game.pwads), ...formatWads(wadDir, episode.pwads), ...formatWads(wadDir, pWads)]
+    iwad: formatWad(wadDir, findFile(episode.iwad || game.iwad, baseFiles)),
+    file: [
+      ...formatWads(wadDir, findFiles(game.pwads, baseFiles)),
+      ...formatWads(wadDir, findFiles(episode.pwads, baseFiles)),
+      ...formatWads(wadDir, pWads)
+    ]
   }
 }
 
@@ -54,6 +59,14 @@ function getWarpValue(game, episodeNumber, mapNumber) {
 
   //MAPy format
   return mapNumber;
+}
+
+function findFile(lowercase, filenames) {
+  return filenames.find(filename => filename.toLowerCase() === lowercase);
+}
+
+function findFiles(lowercases = [], filenames) {
+  return lowercases.map(lowercase => findFile(lowercase, filenames));
 }
 
 function formatWad(wadDir, wad) {

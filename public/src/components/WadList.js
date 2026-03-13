@@ -1,4 +1,4 @@
-function WadList({className, wads, selected, onSelect, onDelete, onApplyCompLevel}) {
+function WadList({className, wads, selected, onSelect, onDelete, onApplySettings}) {
   const [wadUrl, setWadUrl] = React.useState("");
   const [isDownloading, setDownloading] = React.useState(false);
 
@@ -9,22 +9,22 @@ function WadList({className, wads, selected, onSelect, onDelete, onApplyCompLeve
         <span className="doom-font bg-cyan-950 mx-[-0.375em] px-[0.375em]">Additional PWADs</span>
       </div>
       <ul className="w-full inline-flex flex-wrap">
-        {wads.map(({file, compLevel}) => {
+        {wads.map(wad => {
           return (
-            <li key={file} className="w-1/2 shrink-0 odd:pr-2 even:pl-2">
+            <li key={wad.file} className="w-1/2 shrink-0 odd:pr-2 even:pl-2">
               <label className="flex items-center">
-                <input type="checkbox" checked={selected.includes(file)} onChange={() => toggleWad(file)} />
+                <input type="checkbox" checked={selected.includes(wad.file)} onChange={() => toggleWad(wad.file)} />
                 <span
-                  className={`ml-2 truncate ${selected.includes(file) ? " text-sky-400" : ""}`}
-                  title={file}
-                >{file}</span>
+                  className={`ml-2 truncate ${selected.includes(wad.file) ? " text-sky-400" : ""}`}
+                  title={wad.file}
+                >{wad.file}</span>
                 <button
                   type="button"
                   className="ml-auto cursor-pointer"
                   title="Autoselect settings for this WAD"
-                  onClick={() => onApplyCompLevel(compLevel)}
+                  onClick={() => onApplySettings(wad)}
                 >💽</button>
-                <button type="button" className="ml-1 cursor-pointer" title="" onClick={() => onDelete(file)}>🗑️</button>
+                <button type="button" className="ml-1 cursor-pointer" title="" onClick={() => onDelete(wad.file)}>🗑️</button>
               </label>
             </li>
           );

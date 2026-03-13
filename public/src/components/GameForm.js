@@ -1,6 +1,8 @@
-function GameForm({wadDir, profiles, games, skills, defaultSkill, compLevels, availableWads}) {
+const DOOM2_INDEX = 1;
+
+function GameForm({wadDir, profiles, games, skills, defaultSkill, compLevels, knownWads, availableWads}) {
   const [selectedProfile, selectProfile] = React.useState(0);
-  const [selectedGame, selectGame] = React.useState(1); // default to Doom 2
+  const [selectedGame, selectGame] = React.useState(getDefaultSelectedGameIndex());
   const [selectedEpisode, selectEpisode] = React.useState(0);
   const [isWarpEnabled, enableWarp] = React.useState(false);
   const [mapNumber, setMapNumber] = React.useState(1);
@@ -31,6 +33,7 @@ function GameForm({wadDir, profiles, games, skills, defaultSkill, compLevels, av
   // Build command line
   const commandLine = React.useMemo(() => buildCommandLine(
     wadDir,
+    knownWads,
     profiles[selectedProfile],
     games[selectedGame],
     games[selectedGame].episodes[selectedEpisode],
@@ -138,7 +141,7 @@ function GameForm({wadDir, profiles, games, skills, defaultSkill, compLevels, av
             await deleteWad(wad);
             window.location.reload();
           }}
-          onApplyCompLevel={switchToCompLevel}
+          onApplySettings={applySettings}
         />
         <div className="mt-16 flex items-center p-4 rounded-md bg-slate-800">
           <span className="pr-4 font-mono text-xs text-slate-200 cursor-pointer" onClick={copyCommandLine}>{commandLine}</span>
@@ -153,15 +156,27 @@ function GameForm({wadDir, profiles, games, skills, defaultSkill, compLevels, av
     </div>
   );
 
+  function getDefaultSelectedGameIndex() {
+    const availableIndexes = games.reduce((indexes, game, index) => {
+      if (!game.disabled) {
+        indexes.push(index);
+      }
+
+      return indexes;
+    }, []);
+
+    // Default to Doom II if it is available
+    return availableIndexes.includes(DOOM2_INDEX)
+      ? DOOM2_INDEX
+      : availableIndexes[0];
+  }
+
   function getEpisodeOptions(gameIndex) {
     if (!games[gameIndex]) {
       return [];
     }
 
-    return games[gameIndex].episodes.map((episode, episodeIndex) => ({
-      label: episode.title || episode,
-      value: episodeIndex
-    }));
+    return getTitleOptions(games[gameIndex].episodes);
   }
 
   // Filter compatibility modes by selected source port and IWAD
@@ -192,16 +207,14 @@ function GameForm({wadDir, profiles, games, skills, defaultSkill, compLevels, av
     }
   }
 
-  // Reset episode when game changes
-  function handleSelectGame(gameIndex) {
+  function handleSelectGame(gameIndex, episodeIndex = 0, mapNumber = 1) {
     selectGame(gameIndex);
-    handleSelectEpisode(0);
+    handleSelectEpisode(episodeIndex, mapNumber);
   }
 
-  // Reset map number when episode changes
-  function handleSelectEpisode(episodeIndex) {
+  function handleSelectEpisode(episodeIndex, mapNumber = 1) {
     selectEpisode(episodeIndex);
-    setMapNumber(1);
+    setMapNumber(mapNumber);
   }
 
   function handleRun(event, commandLine) {
@@ -212,15 +225,20 @@ function GameForm({wadDir, profiles, games, skills, defaultSkill, compLevels, av
       .then(() => enableRunButton(true));
   }
 
-  function switchToCompLevel(compLevel) {
+  function applySettings({file, compLevel, firstMap}) {
+    // Find 1st available IWAD with matching map format
+    handleSelectGame(
+      games.findIndex(game => game.iwad && !game.disabled && (!!game.usesExMyFormat === (firstMap.episode > 0))),
+      Math.max(0, firstMap.episode - 1),
+      firstMap.map
+    );
+
     if (compLevel === selectedCompLevel) {
       return;
     }
 
-    // Just assume source ports are registered from most strict to least strict (which is encouraged in the docs)
-    //if (!profileIsCompatible(profiles[selectedProfile], compLevel)) {
-      handleSelectProfile(Math.max(0, profiles.findIndex(profile => profileIsCompatible(profile, compLevel))));
-    //}
+    // Assume source ports are registered from most strict to least strict
+    handleSelectProfile(Math.max(0, profiles.findIndex(profile => profileIsCompatible(profile, compLevel))));
 
     selectCompLevel(compLevel);
   }

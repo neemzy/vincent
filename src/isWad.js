@@ -1,9 +1,9 @@
 function isWad(file) {
-  return file.match(/\.(WAD|wad)$/);
+  return file.match(/\.wad$/i);
 }
 
 function isWadOrPk3(file) {
-  return file.match(/\.(WAD|wad|pk3)$/);
+  return file.match(/\.(wad|pk3)$/i);
 }
 
 module.exports = {isWad, isWadOrPk3};

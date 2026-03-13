@@ -5,6 +5,7 @@ function Dropdown({id, className, disabled = false, options, value, onChange}) {
         <option
           key={option.value}
           value={option.value}
+          disabled={option.disabled}
         >{option.label}</option>
       ))}
     </select>

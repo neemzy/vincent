@@ -5,26 +5,43 @@ const unzip = require("unzip");
 const express = require("express");
 const data = require("../data");
 const config = require("../config");
-const addWads = require("./addWads");
-const detectCompLevel = require("./detectCompLevel");
+const {findWads, findWad} = require("./findWads");
+const analyzeWad = require("./analyzeWad");
 const downloadWad = require("./downloadWad");
-const {isWad, isWadOrPk3} = require("./isWad");
+const {getWadOrPk3Files} = require("./getWadFiles");
+const {isWad} = require("./isWad");
 
 // Express app
 const app = express();
 app.use(express.json());
 app.use(express.static("public"));
 
-// Build exclude list out of WAD files referenced in data.json
-const knownWads = data.games.reduce((wads, game) => {
-  addWads(wads, game);
+// Get actual names of files referenced in data.json,
+// and mark unavailable games/episodes as such
+const files = getWadOrPk3Files(config.wadDir);
 
-  (game.episodes || []).forEach(episode => {
-    addWads(wads, episode);
-  });
+const knownWads = data.games.reduce((wads, game) => {
+  findWads(wads, game, files);
+
+  if (Array.isArray(game.episodes)) {
+    game.episodes.forEach(episode => {
+      findWads(wads, episode, files);
+    });
+
+    // Disable game if all episodes are unavailable
+    if (game.episodes.every(episode => episode.disabled)) {
+      game.disabled = true;
+    }
+  }
 
   return wads;
-}, ["id24res.wad", "extras.wad"]); // hide ID24-esque resource WADs since capable source ports autoload those anyway
+}, {});
+
+// Hide ID24-esque resource WADs since capable source ports autoload those anyway
+findWad(knownWads, "id24res.wad", files);
+findWad(knownWads, "extras.wad", files);
+
+const foundWads = Object.values(knownWads).filter(Boolean);
 
 // Expose all JSON (internal and user)
 app.get("/config", async (req, res) => {
@@ -33,12 +50,13 @@ app.get("/config", async (req, res) => {
 
   // Build list of available files in the user's WAD directory,
   // and detect complevels for actual .wad files
-  const availableWads = await fs.readdirSync(currentConfig.wadDir).reduce(async (wads, file) => {
-    if (isWadOrPk3(file) && !knownWads.includes(file)) {
+  const availableWads = await getWadOrPk3Files(config.wadDir).reduce(async (wads, file) => {
+    if (!foundWads.includes(file)) {
       const wad = {file};
 
       if (isWad(file)) {
-        wad.compLevel = await detectCompLevel(path.resolve(currentConfig.wadDir, file));
+        const results = await analyzeWad(path.resolve(config.wadDir, file));
+        Object.keys(results).forEach(key => wad[key] = results[key]);
       }
 
       (await wads).push(wad);
@@ -48,7 +66,7 @@ app.get("/config", async (req, res) => {
   }, []);
 
   res.setHeader("Content-Type", "application/json");
-  res.end(JSON.stringify({...data, ...currentConfig, availableWads}));
+  res.end(JSON.stringify({...data, ...currentConfig, knownWads: foundWads, availableWads}));
 });
 
 // Run command line

@@ -7,7 +7,7 @@
 Your average Doom player typically has multiple source ports installed and too many WADs to keep track of.  
 Like many Doom launchers before it, Vincent lets you quickly pick a source port, IWAD, PWADs and settings and run the game with those at the press of a button, but it can also do the following:
 
-- parse your WADs to detect their respective feature sets (vanilla, Boom, MBF, MBF21 or ID24), and autoselect a complevel and source port accordingly for any one of them
+- parse your WADs to detect their respective feature sets (vanilla, Boom, MBF, MBF21 or ID24) and other data, and autoselect settings accordingly for any one of them
 - download, unzip and add new WADs to your collection from an /idgames URL
 
 ## Installation
@@ -46,18 +46,20 @@ Vincent expects `wadDir` to point to a folder containing **all** your WAD (or PK
 
 The following IWADs (and official PWADs) are supported:
 
-| Description             | Expected filename |
-| ----------------------- | ----------------- |
-| Ultimate Doom           | `doom.wad`        |
-| Doom II                 | `doom2.wad`       |
-| The Plutonia Experiment | `plutonia.wad`    |
-| TNT: Evilution          | `tnt.wad`         |
-| No Rest for the Living  | `nerve.wad`       |
-| SIGIL                   | `sigil.wad`       |
-| SIGIL II                | `sigil2.wad`      |
-| Legacy of Rust          | `id1.wad`         |
-| Freedoom: Phase 1       | `freedoom1.wad`   |
-| Freedoom: Phase 2       | `freedoom2.wad`   |
+| Description             | Expected filename (case insensitive) |
+| ----------------------- | ------------------------------------ |
+| Ultimate Doom           | `doom.wad`                           |
+| Doom II                 | `doom2.wad`                          |
+| The Plutonia Experiment | `plutonia.wad`                       |
+| TNT: Evilution          | `tnt.wad`                            |
+| No Rest for the Living  | `nerve.wad`                          |
+| SIGIL                   | `sigil.wad`                          |
+| SIGIL II                | `sigil2.wad`                         |
+| Legacy of Rust          | `id1.wad`                            |
+| Freedoom: Phase 1       | `freedoom1.wad`                      |
+| Freedoom: Phase 2       | `freedoom2.wad`                      |
+
+Unlike the rest of `config.json`, **changing this value will require the server to be restarted**.
 
 ### Source ports
 
@@ -70,7 +72,7 @@ The `ports` object format is as follows:
       "path": "crispy-doom",            // the actual command that runs Crispy Doom on your system
       "setupPath": "crispy-doom-setup", // (optional) the actual command that runs this port's distinct setup program, if any
       "compLevels": {
-        "vanilla": ""                   // define this port's sole supported complevel
+        "vanilla": ""                   // define this port's sole supported complevel (which requires no extra parameter)
       }
     }
   }
@@ -174,8 +176,9 @@ Then browse the printed URL to access the web interface. You might want to add `
 
 ![User interface](https://raw.githubusercontent.com/neemzy/vincent/refs/heads/main/ui.jpg)
 
-### stuff to remember
+### stuff to write down
 
 - ID24-specific resource files (i.e. `id24res.wad` and `extras.wad`) will be ignored as capable source ports typically autoload these anyway
 - thanks https://github.com/jmickle66666666/wad-js
 - copy to clipboard by clicking command line preview
+- autoselect settings: detect complevel and 1st map name, select complevel, source port, game and episode

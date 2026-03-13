@@ -28,7 +28,7 @@ const jsFiles = [
   ["wad", "detectlump.js"]
 ].map(filePath => fs.readFileSync(path.resolve(__dirname, "..", "node_modules", "wad-js", "src", ...filePath), {encoding: "utf-8"}));
 
-// Must eval() at the root scope to provide Wad and MapData variables
+// Must eval() at the root scope to get access to Wad and MapData variables
 eval(jsFiles[0]);
 eval(jsFiles[1]);
 eval(jsFiles[2]);
@@ -36,7 +36,7 @@ eval(jsFiles[3]);
 eval(jsFiles[4]);
 eval(jsFiles[5]);
 
-async function detectCompLevel(wadFile) {
+async function analyzeWad(wadFile) {
   const wadObj = Object.create(Wad);
 
   try {
@@ -45,15 +45,29 @@ async function detectCompLevel(wadFile) {
     console.error(error);
   }
 
-  // TODO: actually check all maps
+  // Detect first map number (and episode if ExMy format)
   const mapNames = getMapNames(wadObj);
+  const firstMap = {episode: 0, map: 0};
+  const matchExMy = mapNames[0].match(/^E(\d)M(\d)/);
+
+  if (matchExMy) {
+    firstMap.episode = parseInt(matchExMy[1]);
+    firstMap.map = parseInt(matchExMy[2]);
+  } else {
+    firstMap.map = parseInt(mapNames[0].match(/(\d+)/)[1]);
+  }
+
+  // TODO: actually check all maps
   const mapDataObj = Object.create(MapData);
   mapDataObj.load(wadObj, mapNames[0]);
 
-  return getMapDataCompLevel(mapDataObj);
+  return {
+    compLevel: detectCompLevel(mapDataObj),
+    firstMap
+  };
 }
 
-module.exports = detectCompLevel;
+module.exports = analyzeWad;
 
 function loadWadAsPromise(wadFile, wadObj) {
   return new Promise((resolve, reject) => {
@@ -104,10 +118,10 @@ function getMapNames(wadObj) {
     i++;
   }
 
-  return mapNames;
+  return mapNames.sort();
 }
 
-function getMapDataCompLevel(mapDataObj) {
+function detectCompLevel(mapDataObj) {
   return [
     getCollectionCompLevel(mapDataObj.linedefs, "action", lineTypes),
     getCollectionFlagsCompLevel(mapDataObj.linedefs, lineFlags),
