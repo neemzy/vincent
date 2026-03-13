@@ -7,8 +7,8 @@
 Your average Doom player typically has multiple source ports installed and too many WADs to keep track of.  
 Like many Doom launchers before it, Vincent lets you quickly pick a source port, IWAD, PWADs and settings and run the game with those at the press of a button, but it can also do the following:
 
-- parse your WADs to detect their respective feature sets (vanilla, Boom, MBF, MBF21 or ID24) and other data, and autoselect settings accordingly for any one of them
-- download, unzip and add new WADs to your collection from an /idgames URL
+- **detect your WADs' respective feature sets (vanilla, Boom, MBF, MBF21 or ID24)** and other data, and **autoselect settings accordingly** for any one of them
+- **download, unzip and add new WADs** to your collection from an /idgames URL
 
 ## Installation
 
@@ -68,11 +68,13 @@ The `ports` object format is as follows:
 ```js
 {
   "ports": {
-    "crispy": {                         // the key can be anything you want, and will be used to reference this port later on
-      "path": "crispy-doom",            // the actual command that runs Crispy Doom on your system
-      "setupPath": "crispy-doom-setup", // (optional) the actual command that runs this port's distinct setup program, if any
+    "crispy": {                              // the key can be anything you want
+      "path": "crispy-doom",                 // the actual command that runs Crispy Doom on your system
+      "setupPath": "crispy-doom-setup",      // (optional) the actual command that runs Crispy Doom's distinct setup program
       "compLevels": {
-        "vanilla": ""                   // define this port's sole supported complevel (which requires no extra parameter)
+        "final": "-gameversion final",       // List the complevels Crispy Doom supports,
+        "ultimate": "-gameversion ultimate", // and command line parameters for each
+        "doom2": "-gameversion 1.9"
       }
     }
   }
@@ -81,21 +83,21 @@ The `ports` object format is as follows:
 
 The `compLevels` object lists the complevels supported by a given source port, alongside the specific parameters required to run that source port with each complevel. The following keys are supported:
 
-| Key             | Description                                          | [DSDA](https://doomwiki.org/wiki/Compatibility#Speedrunning) equivalent |
-| --------------- | ---------------------------------------------------- | ----------------------------------------------------------------------- |
-| `vanilla`       | Vanilla (no version-specific quirks)                 | -                                                                       |
-| `vanilla_doom2` | Vanilla (Doom II 1.9)                                | 2                                                                       |
-| `vanilla_udoom` | Vanilla (Ultimate Doom)                              | 3                                                                       |
-| `vanilla_final` | Vanilla (Final Doom)                                 | 4                                                                       |
-| `boom`          | Boom-compatible                                      | 9                                                                       |
-| `mbf`           | MBF-compatible                                       | 11                                                                      |
-| `mbf21`         | MBF21-compatible                                     | 21                                                                      |
-| `id24`          | ID24-compatible (not really useful yet AFAICT)       | 24?                                                                     |
-| `default`       | Source port defaults (for UZDoom, Eternity, EDGE...) | -                                                                       |
+| Key       | Description                                    | [DSDA](https://doomwiki.org/wiki/Compatibility#Speedrunning) equivalent |
+| --------- | ---------------------------------------------- | ----------------------------------------------------------------------- |
+| `doom2`   | Vanilla (Doom II 1.9)                          | 2                                                                       |
+| `udoom`   | Vanilla (Ultimate Doom)                        | 3                                                                       |
+| `final`   | Vanilla (Final Doom)                           | 4                                                                       |
+| `vanilla` | Vanilla-esque                                  | -                                                                       |
+| `boom`    | Boom-compatible                                | 9                                                                       |
+| `mbf`     | MBF-compatible                                 | 11                                                                      |
+| `mbf21`   | MBF21-compatible                               | 21                                                                      |
+| `id24`    | ID24-compatible (not really useful yet AFAICT) | 24?                                                                     |
+| `default` | Source port defaults                           | -                                                                       |
 
-You may define any number of these complevels for any given source port, the idea being to match what the source port can do. See the `config.example.json` for a full working configuration with several source ports (including those UZDoom flags noone could possibly ever memorize, you're welcome).
+Note: `vanilla` and `default` are typically used with source ports such as UZDoom, which support beyond-standards maps but don't provide the option to faithfully emulate a specific vanilla game version.
 
-Note that in the example above, using `default` rather than `vanilla` would have been technically more correct as we _are_ running Crispy Doom with its default settings (as evidenced by the fact the corresponding value is an empty string); however, from the broader standpoint of intercompatibility, it makes more sense to use `vanilla` as it will allow Vincent to correctly recommend Crispy Doom for vanilla-compatible maps (more on that below).
+You may define any number of these complevels for any given source port, the idea being to match what the source port can do. [A fully working configuration example](https://github.com/neemzy/vincent/blob/main/config.example.json) with several source ports (including those UZDoom flags noone could possibly ever memorize, you're welcome) is provided.
 
 Let's add a second, slightly more complete example, this time using the Woof! source port:
 
@@ -106,7 +108,9 @@ Let's add a second, slightly more complete example, this time using the Woof! so
       "path": "crispy-doom",
       "setupPath": "crispy-doom-setup",
       "compLevels": {
-        "vanilla": ""
+        "final": "-gameversion final",
+        "ultimate": "-gameversion ultimate",
+        "doom2": "-gameversion 1.9"
       }
     },
     "woof": {
@@ -116,10 +120,9 @@ Let's add a second, slightly more complete example, this time using the Woof! so
         "mbf21": "-complevel mbf21",
         "mbf": "-complevel mbf",
         "boom": "-complevel boom",
-        "vanilla": "-complevel vanilla",
-        "vanilla_doom2": "-complevel vanilla -gameversion 1.9",
+        "vanilla_final": "-complevel vanilla -gameversion final",
         "vanilla_udoom": "-complevel vanilla -gameversion ultimate",
-        "vanilla_final": "-complevel vanilla -gameversion final"
+        "vanilla_doom2": "-complevel vanilla -gameversion 1.9"
       }
     }
   }
@@ -151,9 +154,9 @@ The `profiles` array format is as follows:
 }
 ```
 
-Profiles allow you to use one source port in multiple ways by defining alternative default skill levels (`defaultSkill`: `number` from 1 (ITYTD) to 5 (NM)) and/or parameters (`params`: `string` or `Array<string>`). I like to use it to have both freelook and non-freelook profiles for UZDoom (see `config.example.json` for that, too).
+Profiles allow you to use one source port in multiple ways by defining alternative default skill levels (`defaultSkill`: `number` from 1 (ITYTD) to 5 (NM)) and/or parameters (`params`: `string` or `Array<string>`). I like to use it to have both freelook and non-freelook profiles for UZDoom (once again, see `config.example.json` for that).
 
-Profiles should be ordered from the most strict / least compatible source port (e.g. Chocolate Doom) to the least strict / most compatible one (e.g. UZDoom) in order to benefit the most from the autoselection feature (once again, more on that below).
+Profiles should be ordered from the most strict / least compatible source port (e.g. Chocolate Doom) to the least strict / most compatible one (e.g. UZDoom) in order to benefit the most from the autoselection feature (more on that below).
 
 ### Default skill level
 

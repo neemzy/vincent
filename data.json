@@ -122,26 +122,28 @@
     {
       "key": "vanilla",
       "label": "Vanilla",
+      "gameVersions": [
+        {
+          "key": "doom2",
+          "label": "Doom II 1.9",
+          "iwads": ["doom2.wad", "freedoom2.wad"]
+        },
+        {
+          "key": "ultimate",
+          "label": "Ultimate Doom",
+          "iwads": ["doom.wad", "freedoom1.wad"]
+        },
+        {
+          "key": "final",
+          "label": "Final Doom",
+          "iwads": ["plutonia.wad", "tnt.wad"]
+        }
+      ],
       "lineTypes": [[1, 77], [79, 84], [86, 141]],
       "lineFlags": [[0, 8]],
       "sectorTypes": [[1, 5], [7, 14], 16, 17],
       "thingTypes": [[1, 89], [2001, 2008], [2010, 2015], 2018, 2019, [2022, 2026], 2028, 2035, [2045, 2049], [3001, 3006]],
       "thingFlags": [[0, 4]]
-    },
-    {
-      "key": "vanilla_doom2",
-      "label": "Vanilla (Doom II 1.9)",
-      "iwads": ["doom2.wad", "freedoom2.wad"]
-    },
-    {
-      "key": "vanilla_udoom",
-      "label": "Vanilla (Ultimate Doom)",
-      "iwads": ["doom.wad", "freedoom1.wad"]
-    },
-    {
-      "key": "vanilla_final",
-      "label": "Vanilla (Final Doom)",
-      "iwads": ["plutonia.wad", "tnt.wad"]
     }
   ]
 }

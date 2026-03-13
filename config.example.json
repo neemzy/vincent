@@ -35,9 +35,9 @@
         "mbf21": "-complevel 21",
         "mbf": "-complevel 11",
         "boom": "-complevel 9",
-        "vanilla_doom2": "-complevel 2",
-        "vanilla_udoom": "-complevel 3",
-        "vanilla_final": "-complevel 4"
+        "final": "-complevel 4",
+        "ultimate": "-complevel 3",
+        "doom2": "-complevel 2"
       }
     },
     "woof": {
@@ -47,20 +47,18 @@
         "mbf21": "-complevel mbf21",
         "mbf": "-complevel mbf",
         "boom": "-complevel boom",
-        "vanilla": "-complevel vanilla",
-        "vanilla_doom2": "-complevel vanilla -gameversion 1.9",
-        "vanilla_udoom": "-complevel vanilla -gameversion ultimate",
-        "vanilla_final": "-complevel vanilla -gameversion final"
+        "final": "-complevel vanilla -gameversion final",
+        "ultimate": "-complevel vanilla -gameversion ultimate",
+        "doom2": "-complevel vanilla -gameversion 1.9"
       }
     },
     "crispy": {
       "path": "/path/to/crispy-doom",
       "setupPath": "/path/to/crispy-doom-setup",
       "compLevels": {
-        "vanilla": "",
-        "vanilla_doom2": "-gameversion 1.9",
-        "vanilla_udoom": "-gameversion ultimate",
-        "vanilla_final": "-gameversion final"
+        "final": "-gameversion final",
+        "ultimate": "-gameversion ultimate",
+        "doom2": "-gameversion 1.9"
       }
     }
   },
